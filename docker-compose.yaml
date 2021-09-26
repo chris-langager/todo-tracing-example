@@ -1,0 +1,21 @@
+version: "3.8"
+services:
+  simple-app:
+    depends_on:
+      - simple-app-postgres
+    build:
+      context: ./simple-app
+      target: debug
+    volumes:
+      - ./simple-app:/work/
+    environment:
+      - PORT=3000
+      - POSTGRES_DATABASE_URL=postgres://user:password@simple-app-postgres:5432/postgres
+    ports:
+      - 3000:3000
+  simple-app-postgres:
+    image: postgres:11.2-alpine
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=postgres

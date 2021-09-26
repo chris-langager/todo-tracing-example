@@ -1,0 +1,19 @@
+FROM node:14.17.6-alpine as debug
+
+WORKDIR /work/
+
+RUN npm install
+RUN npm install -g nodemon
+
+# COPY ./src/ /work/src/
+
+ENTRYPOINT [ "nodemon" ]
+
+# FROM node:14.17.6-alpine
+
+# WORKDIR /work/
+# COPY ./src/package.json /work/package.json
+# RUN npm install
+# COPY ./src/ /work/
+
+# CMD node .
