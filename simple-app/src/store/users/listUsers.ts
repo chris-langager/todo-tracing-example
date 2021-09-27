@@ -1,39 +1,33 @@
 import { db } from '../db';
-import { Todo } from '../../types';
+import { User } from '../../types';
 import { parseRow, Row } from './row';
 
 export interface Input {
   ids?: string[];
-  boardIds?: string[];
 }
 
 export interface Output {
-  todos: Todo[];
+  users: User[];
 }
 
-export async function listTodos(input: Input = {}): Promise<Output> {
+export async function listUsers(input: Input = {}): Promise<Output> {
   const [conditionalsSQL, args] = buildWhereClause(input);
 
   const query = `
   SELECT *
-  FROM todos
-  ${conditionalsSQL}
-  ORDER BY date_created;`;
+  FROM users
+  ${conditionalsSQL};`;
 
   const rows = await db.any<Row>(query, args);
 
-  const todos = rows.map(parseRow);
-  return { todos };
+  const users = rows.map(parseRow);
+  return { users };
 }
 
 function buildWhereClause(input: Input): [string, object] {
   const conditionals: string[] = [];
   if (input.ids) {
     conditionals.push(`id in ($(ids:csv))`);
-  }
-
-  if (input.boardIds) {
-    conditionals.push(`board_id in ($(boardIds:csv))`);
   }
 
   if (conditionals.length === 0) return ['', {}];

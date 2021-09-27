@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import * as store from '../store';
+import * as store from '../../store';
 import { v4 as newId } from 'uuid';
 
 export const createTodo: RequestHandler = async (req, res) => {
