@@ -79,3 +79,16 @@
 
 .todo.completed .delete {
 }
+
+.new-todo {
+  padding: 24px 0;
+}
+
+input {
+  width: 100%;
+
+  font-size: 1.2rem;
+  outline: 0;
+  border-width: 0 0 2px;
+  border-color: black;
+}

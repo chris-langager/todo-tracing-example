@@ -2,6 +2,8 @@ const DEFAULT_BOAD = '60748e3f-9118-49f5-b650-9f98855cd0ba';
 
 let selectedBoardId;
 
+const todosListElement = document.getElementById('todos');
+
 (async () => {
   const boards = await listBoards();
 
@@ -13,8 +15,27 @@ let selectedBoardId;
 
   boardSelected(boards[0]);
 
-  //   todosListElement.innerHTML = todos.map(todoToElement).join('');
+  const newTodoFormElement = document.getElementById('new-todo-form');
+  newTodoFormElement.onsubmit = newTodoFormSubmitted;
 })();
+
+async function newTodoFormSubmitted(e) {
+  e.preventDefault();
+  const [input] = e.target;
+  const { value } = input;
+
+  const todo = await createTodo({
+    boardId: selectedBoardId,
+    text: value,
+  });
+
+  const todoElement = todoToElement(todo);
+  todosListElement.appendChild(todoElement);
+
+  const newTodoInputElement = document.getElementById('new-todo-input');
+  newTodoInputElement.value = '';
+  newTodoInputElement.focus();
+}
 
 async function boardSelected(board) {
   const { id, name } = board;
@@ -27,8 +48,6 @@ async function boardSelected(board) {
   }
   document.getElementById(`board-${id}`).classList.add('selected');
 
-  const todosListElement = document.getElementById('todos');
-
   todosListElement.innerHTML = `loading ${name} board...`;
   const todos = await listTodos(id);
   todosListElement.innerHTML = '';
@@ -39,7 +58,6 @@ async function boardSelected(board) {
 }
 
 async function todoDeleted(id) {
-  console.log('deleting');
   await deleteTodo(id);
   document.getElementById(`todo-${id}`).remove();
 }
@@ -140,6 +158,21 @@ async function listTodos(boardId) {
     ...todo,
     createdBy: usersById[todo.createdBy] || null,
   }));
+}
+
+async function createTodo(todo) {
+  return fetch(`/api/todos`, {
+    method: 'POST',
+    headers: {
+      'Content-type': 'application/json',
+    },
+    body: JSON.stringify(todo),
+  }).then(async (response) => {
+    if (response.status !== 200) {
+      throw new Error('error creating todo');
+    }
+    return response.json();
+  });
 }
 
 async function updateTodo(todo) {
