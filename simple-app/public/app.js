@@ -1,14 +1,48 @@
 const DEFAULT_BOAD = '60748e3f-9118-49f5-b650-9f98855cd0ba';
 
+let selectedBoardId;
+
 (async () => {
-  const todos = await listTodos(DEFAULT_BOAD);
+  const boards = await listBoards();
+
+  const boardsListElement = document.getElementById('boards');
+
+  for (let boardElement of boards.map(toBoardElement)) {
+    await boardsListElement.appendChild(boardElement);
+  }
+
+  boardSelected(boards[0]);
+
+  //   todosListElement.innerHTML = todos.map(todoToElement).join('');
+})();
+
+async function boardSelected(board) {
+  const { id, name } = board;
+  if (selectedBoardId === id) return;
+  selectedBoardId = id;
+
+  const boardElements = document.getElementsByClassName('board');
+  for (let boardElement of boardElements) {
+    boardElement.classList.remove('selected');
+  }
+  document.getElementById(`board-${id}`).classList.add('selected');
 
   const todosListElement = document.getElementById('todos');
+
+  todosListElement.innerHTML = `loading ${name} board...`;
+  const todos = await listTodos(id);
+  todosListElement.innerHTML = '';
+
   for (let todoElement of todos.map(todoToElement)) {
     todosListElement.appendChild(todoElement);
   }
-  //   todosListElement.innerHTML = todos.map(todoToElement).join('');
-})();
+}
+
+async function todoDeleted(id) {
+  console.log('deleting');
+  await deleteTodo(id);
+  document.getElementById(`todo-${id}`).remove();
+}
 
 async function listTodos(boardId) {
   const { data: todos } = await fetch(`/api/todos?boardId=${boardId}`).then((response) => response.json());
@@ -24,6 +58,72 @@ async function listTodos(boardId) {
     ...todo,
     createdBy: usersById[todo.createdBy] || null,
   }));
+}
+
+function toBoardElement(board) {
+  const { id, name } = board;
+  const element = htmlToElement(`
+  <div id="board-${id}" class="board">
+     ${name}
+  </div>
+  `);
+
+  element.onclick = () => boardSelected(board);
+
+  return element;
+}
+
+function todoToElement(todo) {
+  const element = htmlToElement(`
+      <div id="todo-${todo.id}" class="todo ${todo.completed ? 'completed' : ''}">
+          <div class="todo-text">
+          ${todo.text}
+          <div>
+
+          <div class="todo-created-by">
+          ${todo.createdBy.name}
+          <div>
+
+          <div class="todo-date-created">
+          ${new Date(todo.dateCreated).toLocaleString()}
+          <div>
+
+          
+      </div>
+      `);
+
+  const deleteButtonElement = htmlToElement(`<div class="delete">delete</div>`);
+  deleteButtonElement.onclick = (e) => {
+    e.stopPropagation();
+    todoDeleted(todo.id);
+  };
+
+  element.appendChild(deleteButtonElement);
+
+  element.onclick = async () => {
+    todo.completed = !todo.completed;
+    try {
+      await updateTodo(todo);
+      element.classList.toggle('completed');
+    } catch (e) {
+      console.log(e);
+      todo.completed = !todo.completed;
+    }
+  };
+
+  return element;
+}
+
+function htmlToElement(html) {
+  var template = document.createElement('template');
+  html = html.trim();
+  template.innerHTML = html;
+  return template.content.firstChild;
+}
+
+async function listBoards() {
+  const { data: boards } = await fetch(`/api/boards`).then((response) => response.json());
+  return boards;
 }
 
 async function listTodos(boardId) {
@@ -56,40 +156,32 @@ async function updateTodo(todo) {
   });
 }
 
-function todoToElement(todo) {
-  const element = htmlToElement(`
-      <div class="todo ${todo.completed ? 'completed' : ''}">
-          <div class="todo-text">
-          ${todo.text}
-          <div>
-
-          <div class="todo-created-by">
-          ${todo.createdBy.name}
-          <div>
-
-          <div class="todo-date-created">
-          ${new Date(todo.dateCreated).toLocaleString()}
-          <div>
-      </div>
-      `);
-
-  element.onclick = async () => {
-    todo.completed = !todo.completed;
-    try {
-      await updateTodo(todo);
-      element.classList.toggle('completed');
-    } catch (e) {
-      console.log(e);
-      todo.completed = !todo.completed;
+async function deleteTodo(id) {
+  await fetch(`/api/todos/${id}`, {
+    method: 'DELETE',
+  }).then((response) => {
+    if (response.status !== 200) {
+      throw new Error('error deleting todo');
     }
-  };
-
-  return element;
+  });
 }
 
-function htmlToElement(html) {
-  var template = document.createElement('template');
-  html = html.trim();
-  template.innerHTML = html;
-  return template.content.firstChild;
+function waitForElement(selector) {
+  return new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      if (document.querySelector(selector)) {
+        resolve(document.querySelector(selector));
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  });
 }

@@ -5,6 +5,7 @@ export interface User {
 
 export interface Board {
   id: string;
+  createdBy: string;
   name: string;
 }
 

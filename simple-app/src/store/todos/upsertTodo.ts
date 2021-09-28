@@ -11,7 +11,6 @@ export interface Input {
 }
 
 export async function upsertTodo(input: Input): Promise<Todo> {
-  console.log({ input });
   const query = `
 INSERT INTO todos (id, created_by, board_id, text, completed) 
 VALUES ($(id), $(createdBy), $(boardId), $(text), $(completed))

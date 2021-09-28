@@ -1,8 +1,81 @@
-.todo {
-  border: 1px solid gray;
-  cursor: pointer;
+* {
+  margin: 0px;
+  padding: 0px;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.todo.completed {
+.header h1 {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.app {
+  width: 800px;
+  margin: auto;
+}
+
+.boards {
+  padding: 8px 0px;
+  display: flex;
+  gap: 8px;
+}
+
+.board {
+  padding: 16px;
+  border: 1px solid rgb(165, 165, 165);
+  cursor: pointer;
+  border-radius: 5px;
+  min-width: 50px;
+  text-align: center;
+}
+
+.board.selected {
+  font-weight: bold;
+  background-color: rgb(165, 165, 165);
+  text-decoration: underline;
+}
+
+.todos {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.todo {
+  padding: 16px;
+  background-color: rgb(230, 230, 230);
+  cursor: pointer;
+
+  box-shadow: 1px 2px 2px hsl(0deg 0% 0% / 0.333), 2px 4px 4px hsl(0deg 0% 0% / 0.333),
+    3px 6px 6px hsl(0deg 0% 0% / 0.333);
+
+  transition: transform 0.1s, background-color 0.1s, opacity 0.1s;
+}
+
+.todo:hover {
+  transform: scale(1.01);
+  background-color: rgb(235, 235, 235);
+  box-shadow: 1px 2px 2px hsl(0deg 0% 0% / 0.2), 2px 4px 4px hsl(0deg 0% 0% / 0.2), 4px 8px 8px hsl(0deg 0% 0% / 0.2),
+    8px 16px 16px hsl(0deg 0% 0% / 0.2), 16px 32px 32px hsl(0deg 0% 0% / 0.2);
+}
+
+.todo-text {
+  font-size: 1.2rem;
+}
+
+.todo-created-by,
+.todo-date-created {
+  font-size: 0.8rem;
+}
+
+.todo.completed .todo-text {
   text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.todo:not(.completed) .delete {
+  display: none;
+}
+
+.todo.completed .delete {
 }

@@ -1,5 +1,5 @@
 import { db } from '../db';
-import { User } from '../../types';
+import { Board } from '../../types';
 import { parseRow, Row } from './row';
 
 export interface Input {
@@ -7,26 +7,22 @@ export interface Input {
 }
 
 export interface Output {
-  users: User[];
+  boards: Board[];
 }
 
-export async function listUsers(input: Input = {}): Promise<Output> {
-  if (input.ids?.length === 0) {
-    return {
-      users: [],
-    };
-  }
+export async function listBoards(input: Input = {}): Promise<Output> {
   const [conditionalsSQL, args] = buildWhereClause(input);
 
   const query = `
   SELECT *
-  FROM users
-  ${conditionalsSQL};`;
+  FROM boards
+  ${conditionalsSQL}
+  ORDER BY date_created;`;
 
   const rows = await db.any<Row>(query, args);
 
-  const users = rows.map(parseRow);
-  return { users };
+  const boards = rows.map(parseRow);
+  return { boards };
 }
 
 function buildWhereClause(input: Input): [string, object] {
