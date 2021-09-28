@@ -1,10 +1,21 @@
-let selectedBoardId;
+let selectedBoardId, user;
 
 const todosListElement = document.getElementById('todos');
+
+const userFormElement = document.getElementById('user-form');
+const userInputElement = document.getElementById('user-input');
 
 pageLoaded();
 
 async function pageLoaded() {
+  user = await getSelf();
+  userInputElement.value = user.name;
+
+  userFormElement.onsubmit = (e) => {
+    e.preventDefault();
+    usernameUpdated(e.target[0].value);
+  };
+
   const boards = await listBoards();
 
   const boardsListElement = document.getElementById('boards');
@@ -17,6 +28,11 @@ async function pageLoaded() {
 
   const newTodoFormElement = document.getElementById('new-todo-form');
   newTodoFormElement.onsubmit = newTodoFormSubmitted;
+}
+
+async function usernameUpdated(username) {
+  userInputElement.value = username;
+  userInputElement.blur();
 }
 
 async function newTodoFormSubmitted(e) {
@@ -121,6 +137,13 @@ function htmlToElement(html) {
   html = html.trim();
   template.innerHTML = html;
   return template.content.firstChild;
+}
+
+async function getSelf() {
+  return {
+    id: 'asdf',
+    name: 'anonymous',
+  };
 }
 
 async function listBoards() {
