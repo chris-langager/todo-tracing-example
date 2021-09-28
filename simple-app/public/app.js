@@ -1,10 +1,10 @@
-const DEFAULT_BOAD = '60748e3f-9118-49f5-b650-9f98855cd0ba';
-
 let selectedBoardId;
 
 const todosListElement = document.getElementById('todos');
 
-(async () => {
+pageLoaded();
+
+async function pageLoaded() {
   const boards = await listBoards();
 
   const boardsListElement = document.getElementById('boards');
@@ -17,7 +17,7 @@ const todosListElement = document.getElementById('todos');
 
   const newTodoFormElement = document.getElementById('new-todo-form');
   newTodoFormElement.onsubmit = newTodoFormSubmitted;
-})();
+}
 
 async function newTodoFormSubmitted(e) {
   e.preventDefault();
@@ -60,22 +60,6 @@ async function boardSelected(board) {
 async function todoDeleted(id) {
   await deleteTodo(id);
   document.getElementById(`todo-${id}`).remove();
-}
-
-async function listTodos(boardId) {
-  const { data: todos } = await fetch(`/api/todos?boardId=${boardId}`).then((response) => response.json());
-  const userIds = [...new Set(todos.map((todo) => todo.createdBy))];
-  const { data: users } = await fetch(`/api/users?ids=${userIds.join(',')}`).then((response) => response.json());
-
-  const usersById = users.reduce((acc, user) => {
-    acc[user.id] = user;
-    return acc;
-  }, {});
-
-  return todos.map((todo) => ({
-    ...todo,
-    createdBy: usersById[todo.createdBy] || null,
-  }));
 }
 
 function toBoardElement(board) {
@@ -196,25 +180,5 @@ async function deleteTodo(id) {
     if (response.status !== 200) {
       throw new Error('error deleting todo');
     }
-  });
-}
-
-function waitForElement(selector) {
-  return new Promise((resolve) => {
-    if (document.querySelector(selector)) {
-      return resolve(document.querySelector(selector));
-    }
-
-    const observer = new MutationObserver((mutations) => {
-      if (document.querySelector(selector)) {
-        resolve(document.querySelector(selector));
-        observer.disconnect();
-      }
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-    });
   });
 }
