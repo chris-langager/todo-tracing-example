@@ -73,11 +73,6 @@ async function boardSelected(board) {
   }
 }
 
-async function todoDeleted(id) {
-  await deleteTodo(id);
-  document.getElementById(`todo-${id}`).remove();
-}
-
 function toBoardElement(board) {
   const { id, name } = board;
   const element = htmlToElement(`
@@ -91,32 +86,41 @@ function toBoardElement(board) {
   return element;
 }
 
+async function deleteButtonClicked(e, id) {
+  e.stopPropagation();
+  await deleteTodo(id);
+  document.getElementById(`todo-${id}`).remove();
+}
+
 function todoToElement(todo) {
   const element = htmlToElement(`
       <div id="todo-${todo.id}" class="todo ${todo.completed ? 'completed' : ''}">
           <div class="todo-text">
           ${todo.text}
-          <div>
+          </div>
+
+          <div class="delete" onclick="deleteButtonClicked(event, '${todo.id}')">x</div>
 
           <div class="todo-created-by">
           ${todo.createdBy.name}
-          <div>
+          </div>
 
           <div class="todo-date-created">
           ${new Date(todo.dateCreated).toLocaleString()}
-          <div>
+          </div>
 
           
       </div>
       `);
 
-  const deleteButtonElement = htmlToElement(`<div class="delete">delete</div>`);
-  deleteButtonElement.onclick = (e) => {
-    e.stopPropagation();
-    todoDeleted(todo.id);
-  };
+  // const deleteButtonElement = htmlToElement(`<div class="delete">x</div>`);
+  // element.replaceChild(deleteButtonElement, element.childNodes[2]);
+  // deleteButtonElement.onclick = (e) => {
+  //   e.stopPropagation();
+  //   todoDeleted(todo.id);
+  // };
 
-  element.appendChild(deleteButtonElement);
+  // element.appendChild(deleteButtonElement);
 
   element.onclick = async () => {
     todo.completed = !todo.completed;
