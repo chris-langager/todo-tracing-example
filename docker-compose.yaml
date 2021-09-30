@@ -1,19 +1,29 @@
 version: "3.8"
 services:
-  simple-app:
+  front-end:
     depends_on:
-      - simple-app-postgres
+      - monolith
     build:
-      context: ./simple-app
-      target: debug
+      context: ./frontend
+      target: dev
     volumes:
-      - ./simple-app:/work/
+      - ./frontend/html:/usr/share/nginx/html
+    ports:
+      - 80:80
+  monolith:
+    depends_on:
+      - monolith-postgres
+    build:
+      context: ./monolith
+      target: dev
+    volumes:
+      - ./monolith:/work/
     environment:
       - PORT=3000
-      - POSTGRES_DATABASE_URL=postgres://user:password@simple-app-postgres:5432/postgres
+      - POSTGRES_DATABASE_URL=postgres://user:password@monolith-postgres:5432/postgres
     ports:
       - 3000:3000
-  simple-app-postgres:
+  monolith-postgres:
     image: postgres:11.2-alpine
     environment:
       - POSTGRES_USER=user
