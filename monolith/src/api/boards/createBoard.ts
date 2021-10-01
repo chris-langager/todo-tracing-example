@@ -9,7 +9,7 @@ export const createBoard: RequestHandler = async (req, res) => {
 
   const board = await store.upsertBoard({
     id,
-    createdBy: req.userId,
+    createdBy: req.user.id,
     name,
   });
   res.json(board);

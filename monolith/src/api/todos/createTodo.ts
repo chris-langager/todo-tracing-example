@@ -17,7 +17,7 @@ export const createTodo: RequestHandler = async (req, res) => {
 
   const todo = await store.upsertTodo({
     id,
-    createdBy: req.userId,
+    createdBy: req.user.id,
     boardId,
     text,
     completed: false,

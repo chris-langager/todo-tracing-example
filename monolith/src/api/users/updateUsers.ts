@@ -8,6 +8,6 @@ export const updateUser: RequestHandler = async (req, res) => {
     res.json({ code: 404, message: `could not find user with id "${id}"` });
   }
 
-  const updatedUser = store.upsertUser({ ...user, name });
+  const updatedUser = await store.upsertUser({ ...user, name });
   res.json(updatedUser);
 };

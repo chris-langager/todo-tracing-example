@@ -1,38 +1,33 @@
 import * as express from 'express';
+import * as cookieParser from 'cookie-parser';
 import * as api from './api';
+
 import { ENV } from './env';
+import { authMiddleware } from './authMiddleware';
 
 const app = express();
 const port = parseInt(ENV.PORT);
 
-app.use((req, res, next) => {
-  console.log(req.path);
-  next();
-});
-
 //middleware
+app.use(cookieParser());
 app.use(express.json());
+app.use(authMiddleware);
 
-declare global {
-  namespace Express {
-    interface Request {
-      userId: string;
-    }
-  }
-}
-app.use((req, res, next) => {
-  req.userId = 'e687f45a-1bec-429a-bb51-caa5aa505b87';
-  next();
-});
+// app.use((req, res, next) => {
+//   req.userId = 'e687f45a-1bec-429a-bb51-caa5aa505b87';
+//   next();
+// });
 
 app.use((req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
   next();
 });
 
+app.get('/self', (req, res) => res.json(req.user));
+
 app.get('/users', api.listUsers);
 app.post('/users', api.createUser);
-app.put('/users', api.updateUser);
+app.put('/users/:id', api.updateUser);
 
 app.get('/boards', api.listBoards);
 app.post('/boards', api.createBoard);

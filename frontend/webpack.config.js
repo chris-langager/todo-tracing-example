@@ -1,23 +1,22 @@
-const path = require("path");
+const path = require('path');
 
 module.exports = {
-  mode: "development",
-  devtool: "inline-source-map",
+  mode: 'production',
   entry: {
-    main: "./src/app.ts",
+    main: './src/index.ts',
   },
   output: {
-    path: path.resolve(__dirname, "./html"),
-    filename: "app-bundle.js",
+    path: path.resolve(__dirname, './html'),
+    filename: 'app-bundle.js',
   },
   resolve: {
-    extensions: [".ts", ".tsx", ".js"],
+    extensions: ['.ts', '.tsx', '.js'],
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        loader: "ts-loader",
+        loader: 'ts-loader',
       },
     ],
   },
