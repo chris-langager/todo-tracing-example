@@ -4,3 +4,7 @@ export function htmlToElement(html: string): HTMLElement {
   template.innerHTML = html;
   return template.content.firstChild as HTMLElement;
 }
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

@@ -1,5 +1,5 @@
 import * as sdk from './restSdk';
-import { htmlToElement } from './utils';
+import { htmlToElement, sleep } from './utils';
 
 let selectedBoardId, user;
 
@@ -103,7 +103,7 @@ window['deleteButtonClicked'] = async (e: MouseEvent, id: string) => {
 
 function todoToElement(todo) {
   const element = htmlToElement(`
-      <div id="todo-${todo.id}" class="todo ${todo.completed ? 'completed' : ''}">
+      <div id="todo-${todo.id}" class="todo ${todo.completed ? 'completed' : ''}" draggable="true">
         <div class="top">   
           <div class="todo-text">
             ${todo.text}
@@ -124,16 +124,67 @@ function todoToElement(todo) {
       </div>
       `);
 
-  element.onclick = async () => {
-    todo.completed = !todo.completed;
-    try {
-      await sdk.updateTodo(todo);
-      element.classList.toggle('completed');
-    } catch (e) {
-      console.log(e);
-      todo.completed = !todo.completed;
+  element.ondragstart = () => {
+    element.classList.add('dragging');
+  };
+
+  element.ondragend = () => {
+    element.classList.remove('dragging');
+  };
+
+  todosListElement.ondragover = (e) => {
+    e.preventDefault();
+    const dragging = document.querySelector('.dragging');
+    const afterElement = getTodoAfterElement(todosListElement, e.clientY);
+    if (afterElement == null) {
+      todosListElement.appendChild(dragging);
+    } else {
+      todosListElement.insertBefore(dragging, afterElement);
     }
   };
 
+  let timer, blockClickEvent;
+
+  element.ondblclick = () => {
+    clearTimeout(timer);
+    blockClickEvent = true;
+    console.log('double click');
+  };
+
+  element.onclick = async () => {
+    timer = setTimeout(async () => {
+      if (blockClickEvent) {
+        blockClickEvent = false;
+        return;
+      }
+
+      todo.completed = !todo.completed;
+      try {
+        element.classList.toggle('completed');
+        await sdk.updateTodo(todo);
+      } catch (e) {
+        todo.completed = !todo.completed;
+        element.classList.toggle('completed');
+      }
+    }, 100);
+  };
+
   return element;
+}
+
+function getTodoAfterElement(todoList: HTMLElement, y: number) {
+  const todoElements = Array.from(todoList.querySelectorAll('.todo:not(.dragging)'));
+
+  return todoElements.reduce(
+    (closest, element) => {
+      const box = element.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element };
+      } else {
+        return closest;
+      }
+    },
+    { offset: Number.NEGATIVE_INFINITY, element: null }
+  ).element;
 }
